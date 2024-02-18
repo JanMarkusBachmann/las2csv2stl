@@ -12,7 +12,8 @@ class Vektor:
         self.z = self.z2 - self.z1
         self.x = self.x2 - self.x1
         self.y = self.y2 - self.y1
-        self.pikk = math.sqrt(((self.x)**2)+((self.y)**2)+(self.z)**2))
+        self.pikk = math.sqrt(((self.x) ** 2) + ((self.y) ** 2))
+        self.pikkz = math.sqrt(((self.x)**2)+((self.y)**2)+(self.z)**2)
         if self.pikk != 0:
             self.kaal = 1/((self.pikk*10)**2)
         else:
@@ -45,6 +46,7 @@ class Mesh:
         self.mesh = {}  #xcord{ycord}
         self.meshing()
         self.meshZcord = {}
+        self.generategrid()
     def meshing(self):
         gridNx = int(self.gridnum[0])
         gridNy = int(self.gridnum[1])
@@ -80,14 +82,30 @@ class Mesh:
                 ykordmax = self.gridnum[1]
         i = xkordmin
         j = xkordmax
-        cap = 1
         dots = []
+        vekts = []
         while i <= xkordmax:
             while j <= ykordmax:
                 dots.extend(self.mesh[i][j])
+        zval = 0.0
+        zsum = 0.0
+        znum = 0
         for dot in dots:
-            RN = Vektor(x, dot[0], y, dot[1])
+            RN = Vektor(x, dot[0], y, dot[1], z2= dot[2])
+            vekts.append(RN)
+        sortvekts = sorted(vekts, key=lambda vek: vek.pikk)
+        while (znum < self.naabrid) or znum == len(vekts):
+            zsum += sortvekts[znum].kaal
+            zval += sortvekts[znum].kaal * sortvekts[znum].z1
+            znum += 1
+        RN.z = zval/zsum
+        address = (x, y)
+        self.meshZcord.update({address: RN})
 
+    def generategrid(self):
+        for xR in mesh.keys():
+            for yR in xrida.keys():
+                self.generateZcord(xR, yR)
     def __str__(self):
         return f'Mesh x({self.minx}-{self.maxx}), y({self.miny}-{self.maxy}), milles on {len(self.dataset)} andmepunkti'
 
@@ -132,8 +150,8 @@ naabrid = idealtihedus
 sqrsize = 1
 gridnum = (meshx/sqrsize, meshy/sqrsize)
 m1 = Mesh(data, minx, maxx, miny, maxy, sqrsize, naabrid, gridnum)
-print(m1)
-print(m1.mesh[103][301])
+for i in m1.meshZcord.keys():
+    print(m1.meshZcord[i])
 
 
 
