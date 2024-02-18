@@ -91,19 +91,24 @@ class Mesh:
         while i <= xkordmax:
             while j <= ykordmax:
                 dots.extend(self.mesh[i][j])
+                j += 1
+            i += 1
         zval = 0.0
         zsum = 0.0
         znum = 0
+        address = (x, y)
         for dot in dots:
             RN = Vektor(x, dot[0], y, dot[1], z2= dot[2])
             vekts.append(RN)
         sortvekts = sorted(vekts, key=lambda vek: vek.pikk)
+        if not sortvekts:
+            self.meshZcord.update({address: RN})
+            return None
         while (znum < self.naabrid) or znum == len(vekts):
             zsum += sortvekts[znum].kaal
             zval += sortvekts[znum].kaal * sortvekts[znum].z1
             znum += 1
         RN.z = zval/zsum
-        address = (x, y)
         self.meshZcord.update({address: RN})
 
     def generategrid(self):
