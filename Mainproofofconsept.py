@@ -70,18 +70,22 @@ class Mesh:
         else:
             if (0 >= (x - self.voidcap)):
                 xkordmin = 0
+                xkordmax = x + self.voidcap
             elif ((x + self.voidcap) >= self.gridnum[0]):
                 xkordmax = self.gridnum[0]
+                xkordmin = x - self.voidcap
         if (0 <= (y - self.voidcap)) and ((y + self.voidcap) <= self.gridnum[1]):
             ykordmin = y - self.voidcap
             ykordmax = y + self.voidcap
         else:
             if (0 >= (y - self.voidcap)):
                 ykordmin = 0
+                ykordmax = y + self.voidcap
             elif ((y + self.voidcap) >= self.gridnum[1]):
                 ykordmax = self.gridnum[1]
+                ykordmin = x - self.voidcap
         i = xkordmin
-        j = xkordmax
+        j = ykordmin
         dots = []
         vekts = []
         while i <= xkordmax:
@@ -103,8 +107,8 @@ class Mesh:
         self.meshZcord.update({address: RN})
 
     def generategrid(self):
-        for xR in mesh.keys():
-            for yR in xrida.keys():
+        for xR in self.mesh.keys():
+            for yR in self.mesh[xR].keys():
                 self.generateZcord(xR, yR)
     def __str__(self):
         return f'Mesh x({self.minx}-{self.maxx}), y({self.miny}-{self.maxy}), milles on {len(self.dataset)} andmepunkti'
