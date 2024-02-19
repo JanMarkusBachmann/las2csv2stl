@@ -10,13 +10,59 @@ def arvutakaal(kaugusx, kaugusy):
     else:
         kaal = 1 / ((10 * pikus) ** 2)
         return kaal
+
+class Triangle:
+    vektorbank = {}  # globaalne bank arvutatud vektorite jaoks formaadis - [X, Y]: [a ->b]
+    def __init__(self, a, b, c):
+        self.a = a  # punktid
+        self.b = b
+        self.c = c
+        self.ab = self.leiavektor()
+
+    def leiavektor(self, a, b):
+        if [a, b] in Triangle.vektorbank.keys():
+            return Triangle.vektorbank[[a, b]]
+        else:
+            vx = b.x - a.x
+            vy = b.y - a.y
+            vz = b.synZ - a.synZ
+            v = [vx, vy, vz]
+            Triangle.vektorbank.update({[a, b]: v})
+            return v
+
+    def leianormaal(self, a, b, tyyp='up'):
+        xm = a.x
+        xn = b.x
+        ym = a.y
+        yn = b.y
+        zm = a.synZ
+        zn = b.synZ
+        # avrutame determinantidega vektor korrutise
+        x = ym * zn - yn * zm
+        y = -(xm * zn - xn * zm)
+        z = xm * yn - ym * xn
+        if tyyp == 'up':
+            if z < 0:
+                return [x, y, z]
+            else:
+                return [-x, -y, -z]
+        elif tyyp == 'down':
+            if z > 0:
+                return [x, y, z]
+            else:
+                return [-x, -y, -z]
+
+
 class Syndot:
+    gridlen = 1.0
     def __init__(self, m, n):
-        self.m = m #x cord
+        self.m = m  # x cord
         self.n = n
-        self.kaalutudnaabrid = {}  #{kaal: zcord of realdot}
+        self.kaalutudnaabrid = {}  # {kaal: zcord of realdot}
         self.synZ = 0.0
         self.trueZ = False
+        self.x = Syndot.gridlen * self.m
+        self.y = Syndot.gridlen * self.n
 
     def arvutaZ(self):
         if not self.kaalutudnaabrid:
@@ -68,6 +114,7 @@ class Mesh:
         self.sizex = sizex  #number of xcord for syndata
         self.sizey = sizey  #number of ycord for syndata
         self.sqrsize = sqrsize  #sqaresize or distance from point to point
+        Syndot.gridlen = self.sqrsize
         self.syndots = {}  #dub dic of created syndata {x1: {x1y1: Syndot; x1y2: Syndot; ...}, x2:{...},...}
         self.createsyndotdic()
         self.sorteeridata()
