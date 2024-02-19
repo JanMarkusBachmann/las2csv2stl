@@ -94,7 +94,7 @@ class Mesh:
         for x in self.syndots.keys():
             for y in self.syndots.keys():
                 self.syndots[x][y].arvutaZ()
-        print('keksmine Z arvutud')
+        print('keksmine z arvutud')
     def __str__(self):
         return f'mesh {self.sizex}, {self.sizey} - XY, andmepunkte on {len(self.data)}'
 
