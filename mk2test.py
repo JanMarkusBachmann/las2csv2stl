@@ -70,7 +70,7 @@ class Triangle:
         y = y/kordaja
         z = z/kordaja
         if tyyp == 'up':
-            if z < 0:
+            if z > 0:
                 return (x, y, z)
             else:
                 return (-x, -y, -z)
@@ -191,7 +191,7 @@ class Mesh:
                 c = self.syndots[i + 1][j + 1]
                 d = self.syndots[i][j + 1]
                 tri1 = Triangle(a, b, c)
-                tri2 = Triangle(a, d, c)
+                tri2 = Triangle(a, c, d)
                 self.kolmnurgad.append(tri1)
                 self.kolmnurgad.append(tri2)
                 j += 1
