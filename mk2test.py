@@ -155,6 +155,7 @@ class Mesh:
         self.syndots = {}  #dub dic of created syndata {x1: {x1y1: Syndot; x1y2: Syndot; ...}, x2:{...},...}
         self.createsyndotdic()
         self.sorteeridata()
+        self.data = []
         self.arvutaZsyndotidele()
         self.kolmnurgad = []
         self.genkolmnurad()
