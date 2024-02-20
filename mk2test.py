@@ -145,11 +145,12 @@ class Realdot:
         return f'Andme punkt {self.x}, {self.y}, {self.z} XYZ, On paigutatud?: {self.sorteeritud}'
 
 class Mesh:
-    def __init__(self, data, sizex, sizey, sqrsize):
+    def __init__(self, data, sizex, sizey, sqrsize, nimi):
         self.data = data  #realdatapoints from lidar data NORMALIZED
         self.sizex = sizex  #number of xcord for syndata
         self.sizey = sizey  #number of ycord for syndata
         self.sqrsize = sqrsize  #sqaresize or distance from point to point
+        self.nimi = nimi
         Syndot.gridlen = self.sqrsize
         self.syndots = {}  #dub dic of created syndata {x1: {x1y1: Syndot; x1y2: Syndot; ...}, x2:{...},...}
         self.createsyndotdic()
@@ -200,7 +201,7 @@ class Mesh:
 
     def exportmesh(self):
         txt = []
-        nimi = input('Vali oma objektile nimi')
+        nimi = self.nimi
         txt.append(f'solid {nimi}')
         for tri in self.kolmnurgad:
             txt.append(tri.stlprintout())
@@ -224,7 +225,7 @@ def csv2list(path=None):  # loeb csv faili ja tagastab listi punktide kordinaati
     maxy = float(0)
     file = open(pathni, encoding='UTF-8')
     for rida in file:
-        if rida != 'X,Y,Z\n':
+        if rida != 'X,Y,Z\n' and rida != '\n':
             string = rida.strip('\n')
             RN = string.split(',')
             RNfl = [float(RN[0]), float(RN[1]), float(RN[2])]  # x,y,z
@@ -251,7 +252,8 @@ sqrsize = 1
 sizex = math.ceil(maxx/sqrsize)
 sizey = math.ceil(maxy/sqrsize)
 print(datetime.datetime.now())
-m1 = Mesh(data, sizex, sizey, sqrsize)
+nimi = input('mis on faili nimi?: ')
+m1 = Mesh(data, sizex, sizey, sqrsize, nimi)
 mesh, nimi = m1.exportmesh()
 f = open(f'{nimi}.stl', 'w', encoding='UTF-8')
 print(datetime.datetime.now())
