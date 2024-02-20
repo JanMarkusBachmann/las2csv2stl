@@ -178,7 +178,7 @@ class Mesh:
 
     def arvutaZsyndotidele(self):
         for x in self.syndots.keys():
-            for y in self.syndots.keys():
+            for y in self.syndots[x].keys():
                 self.syndots[x][y].arvutaZ()
         print(f'keksmine z arvutud {datetime.datetime.now()}')
 
@@ -245,14 +245,14 @@ def csv2list(path=None):  # loeb csv faili ja tagastab listi punktide kordinaati
         datanorm.append(RN)
     return datanorm, 0.0, maxx-minx, 0.0, maxy-miny
 
-
+nimi = input('mis on faili nimi?: ')
 data, minx, maxx, miny, maxy = csv2list()
 datasize = len(data)
 sqrsize = 1
 sizex = math.ceil(maxx/sqrsize)
 sizey = math.ceil(maxy/sqrsize)
 print(datetime.datetime.now())
-nimi = input('mis on faili nimi?: ')
+
 m1 = Mesh(data, sizex, sizey, sqrsize, nimi)
 mesh, nimi = m1.exportmesh()
 f = open(f'{nimi}.stl', 'w', encoding='UTF-8')
