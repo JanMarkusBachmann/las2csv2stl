@@ -249,7 +249,7 @@ def csv2list(path=None):  # loeb csv faili ja tagastab listi punktide kordinaati
 nimi = input('mis on faili nimi?: ')
 data, minx, maxx, miny, maxy = csv2list()
 datasize = len(data)
-sqrsize = 1
+sqrsize = 0.5
 sizex = math.ceil(maxx/sqrsize)
 sizey = math.ceil(maxy/sqrsize)
 print(datetime.datetime.now())
