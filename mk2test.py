@@ -250,7 +250,7 @@ def csv2list(path=None):  # loeb csv faili ja tagastab listi punktide kordinaati
 
 data, minx, maxx, miny, maxy, nimi = csv2list()
 datasize = len(data)
-sqrsize = 1
+sqrsize = 0.5
 sizex = math.ceil(maxx/sqrsize)
 sizey = math.ceil(maxy/sqrsize)
 print(datetime.datetime.now())
@@ -260,5 +260,6 @@ mesh, nimi = m1.exportmesh()
 f = open(f'{nimi}.stl', 'w', encoding='UTF-8')
 print(datetime.datetime.now())
 f.write(mesh)
+f.close()
 print('valmis!')
 print(datetime.datetime.now())
