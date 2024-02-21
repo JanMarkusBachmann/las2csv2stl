@@ -218,6 +218,7 @@ def csv2list(path=None):  # loeb csv faili ja tagastab listi punktide kordinaati
     if path == None:
         pathnimi = str(tkinter.filedialog.askopenfile())
         pathni = pathnimi.split("'")[1]
+    nimi = input('mis on faili nimi?: ')
     print(datetime.datetime.now())
     data = []
     minx = float(0)
@@ -244,12 +245,12 @@ def csv2list(path=None):  # loeb csv faili ja tagastab listi punktide kordinaati
     for pkt in data:
         RN = [round((pkt[0]-minx), 3), round((pkt[1]-miny), 3), round(pkt[2], 3)]
         datanorm.append(RN)
-    return datanorm, 0.0, maxx-minx, 0.0, maxy-miny
+    return datanorm, 0.0, maxx-minx, 0.0, maxy-miny, nimi
 
-nimi = input('mis on faili nimi?: ')
-data, minx, maxx, miny, maxy = csv2list()
+
+data, minx, maxx, miny, maxy, nimi = csv2list()
 datasize = len(data)
-sqrsize = 0.5
+sqrsize = 1
 sizex = math.ceil(maxx/sqrsize)
 sizey = math.ceil(maxy/sqrsize)
 print(datetime.datetime.now())
