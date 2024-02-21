@@ -1,0 +1,3 @@
+Genereerida kaks meshi. yks detailine ja teine vaga vahe detailne. nt 4 ja 1 meshsizeiga. Kui vahedetailne ei leia datapunkte siis votab ta selle suurest meshist lihtsalt
+
+genereerida viis kuidas meri teha paremini tuvastatavaks.
