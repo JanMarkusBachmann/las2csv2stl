@@ -171,6 +171,11 @@ class Mesh:
             self.syndots.update({i: dempdic})
             i += 1
         print(f'Synmesh created {datetime.datetime.now()}')
+
+    def cleanup(self):
+        self.kolmnurgad = []
+        self.syndots = {}
+        Triangle.vektorbank = {}
     def sorteeridata(self):  # tekitab realdot objektid ning koheselt paigutrab need syndot naabrite dictioneridesse
         for punkt in self.data:
             pktRN = Realdot(punkt[0], punkt[1], punkt[2], self.sqrsize)
@@ -261,5 +266,8 @@ f = open(f'{nimi}.stl', 'w', encoding='UTF-8')
 print(datetime.datetime.now())
 f.write(mesh)
 f.close()
+mesh = ''
+m1.cleanup()
+data = []
 print('valmis!')
 print(datetime.datetime.now())
