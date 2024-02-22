@@ -1,0 +1,84 @@
+Properties
+Object Properties
+
+Limit to: Selected Only
+
+    Only export the selected objects. Otherwise export all objects in the scene.
+Scale
+
+    Global scale to use on export.
+Forward Axis, Up Axis
+
+    Since many applications use a different axis for ‘Up’, there are axis conversion settings, Forward and Up axis – By mapping these to different axis you can convert rotations between applications default up and forward axis.
+
+    Blender uses Y Forward, Z Up (since the front view looks along the +Y direction). For example, its common for applications to use Y as the up axis, in that case -Z Forward, Y Up is needed.
+Objects: Apply Modifiers
+
+    Export objects using the evaluated mesh, meaning the resulting mesh after all Modifiers have been calculated.
+Properties
+
+    For properties that have different settings for the viewport/final render pick which is used for output. One example where this is important is the Subdivision Surface Modifier.
+
+    Viewport:
+
+        Use viewport properties.
+    Render:
+
+        Use final render properties.
+
+Geometry Properties
+
+UV Coordinates
+
+    Write out the active UV layers coordinates from Blender.
+Normals
+
+    Write out Blender’s face and vertex normals (depending on the faces smooth setting).
+
+    Mostly this isn’t needed since most applications will calculate their own normals but to match Blender’s normal map textures you will need to write these too.
+Colors
+
+    Write out the active vertex colors attribute layer, if present. Colors are exported in “xyzrgb” OBJ extension format.
+Triangulated Mesh
+
+    Write out quads as two triangles. Some programs only have very basic OBJ support and only support triangles.
+Curves as NURBS
+
+    Write out NURBS curves as OBJ NURBS rather than converting to geometry.
+
+Material Properties
+
+Export
+
+    Write out the MTL-file along with the OBJ. Most importers that support OBJ will also read the MTL-file.
+PBR Extensions
+
+    Export MTL library using PBR extensions (roughness, metallic, sheen, clearcoat, anisotropy, transmission).
+Path Mode
+
+    When referencing paths in exported files you may want some control as to the method used since absolute paths may only be correct on your own system. Relative paths, on the other hand, are more portable but mean that you have to keep your files grouped when moving about on your local file system. In some cases, the path doesn’t matter since the target application will search a set of predefined paths anyway so you have the option to strip the path too.
+
+    Auto:
+
+        Uses relative paths for files which are in a subdirectory of the exported location, absolute for any directories outside that.
+    Absolute:
+
+        Uses full paths.
+    Relative:
+
+        Uses relative paths in every case (except when on a different drive on Windows).
+    Match:
+
+        Uses relative / absolute paths based on the paths used in Blender.
+    Strip Path:
+
+        Only write the filename and omit the path component.
+    Copy:
+
+        Copy the file on exporting and reference it with a relative path.
+
+Grouping Properties
+
+Object Groups
+
+    Write out each Blender object as an OBJ object.
