@@ -1,3 +1,5 @@
 Genereerida kaks meshi. yks detailine ja teine vaga vahe detailne. nt 4 ja 1 meshsizeiga. Kui vahedetailne ei leia datapunkte siis votab ta selle suurest meshist lihtsalt
 
+csv faili tegemisel saab lisada ka rgb data ning ka andmepunkti tyybi(vesi, tee, korgetaimestik jne) ning kui selle ymber teha alorytm mis ei keskmista ainult andme punktide vaid ka eraldi andmetyypide vahel
+
 genereerida viis kuidas meri teha paremini tuvastatavaks.
