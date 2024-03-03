@@ -61,8 +61,8 @@ Vektor vektorkorutis(Vektor M, Vektor N){
         return {x, y, z};
     }   else {
         return {-x, -y, -z};
-    };
-};
+    }
+}
 
 class Stltriangle {
     // plaan oleks constructoriga otse genereerida ja vb ka kirjutada kohe 50byte pack faili
@@ -87,7 +87,7 @@ class FileSTLbin {
 public:
     std::vector<Stltriangle> kolmnurgad;
 
-    void binwriteout(std::string nimi){
+    void binwriteout(const std::string& nimi){
         //genereerimie failile nime ja binaar nime
         std::stringstream failinimi;
         failinimi << nimi << ".stl";
@@ -103,8 +103,8 @@ public:
         std::memcpy(headerbuff.data(), nimi.data(), nimi.size() * 8);
         for (auto i = (nimi.size()); i <= 80; i += 1){
             headerbuff[i-1] = 0;
-        };
-        outFile.write(reinterpret_cast<char*>(headerbuff.data()), headerbuff.size());
+        }
+        outFile.write(reinterpret_cast<char*>(headerbuff.data()), 80);
 
         //kolmnurkade arv
         int number = kolmnurgad.size();
@@ -127,7 +127,7 @@ class Syndot {
         Lisaks ei pea syndot teadma oma enda kordinaate meshpinnal. Sellega on voimalik valtida malukulukat 4 doubel kordinaati */
         double zval = 0.0;
         double zsum = 0.0;
-        double arvutaz(){
+        double arvutaz() const {
             if (zsum != 0.0) {
                 return zval/zsum;
             } else {std::cout << "syndot valmis aga datat pole \n";
