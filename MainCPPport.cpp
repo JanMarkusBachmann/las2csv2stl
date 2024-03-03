@@ -12,14 +12,6 @@
 #include <thread>
 #include <map>
 #include <tuple>
-#include <iostream>
-#include <fstream>
-#include <thread>
-#include <array>
-#include <vector>
-#include <string>
-#include <sstream>
-#include <tuple>
 #include <cstdint>
 #include <cstring>
 
@@ -34,8 +26,6 @@ double arvutakaal(float x, float y){
 
 struct Point {
     float x, y, z;
-
-    Point(float _x, float _y, float _z) : x(_x), y(_y), z(_z) {}
 };
 
 class Vektor {
@@ -140,7 +130,8 @@ class Syndot {
         double arvutaz(){
             if (zsum != 0.0) {
                 return zval/zsum;
-            }
+            } else {std::cout << "syndot valmis aga datat pole \n";
+            return 0.0;}
         };
 
 };
@@ -279,14 +270,23 @@ class Mesh {
         syndotsTihe[{xsec + 1, ysec + 1}].zval += arvutakaal(xup, yup) * z;
         //selle lahendusega on voimalik et koik syndotid ei genereerita. Selle jaoks peab kolmnurkade arvutamisel sellega arvestama
     }
-    void syndata(long int start, long int end){
-        // arvutame koigi syndotide vaartused ning vajadusel genereerime lisa punkte kui on moni vahele jaanud
-
+    void syndata(long int start , unsigned long int end){
+        // arvutame koigi syndotide vaartused
+        for (int i = start; i <= end; i += 1){
+            std::tuple<long, long> &voti = XYvotmedTihe[i];
+            Point punktRN{};
+            punktRN.x = static_cast<float>(std::get<0>(voti)) * sqsize;
+            punktRN.y = static_cast<float>(std::get<1>(voti)) * sqsize;
+            double z_double = syndotsTihe[voti].arvutaz(); // assuming arvutaz() returns double
+            punktRN.z = static_cast<float>(z_double); // cast double to float
+            PunktidXYZ[voti] = punktRN;
+        }
     }
     Mesh(std::string const pathnimi, std::string const meshnimi, float ruudusuurus) {
         sqsize = ruudusuurus;
         // valmistame kolmnurgad saadud dataga
         genmesh(pathnimi);
+        syndata(0, XYvotmedTihe.size());
 
     }
 };
