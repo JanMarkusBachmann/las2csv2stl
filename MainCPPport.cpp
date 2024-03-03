@@ -29,7 +29,7 @@ struct Point {
 };
 
 class Vektor {
-public:
+    public:
     float vx, vy, vz;
     Vektor(Point yks, Point kaks) {
         vx = kaks.x - yks.x;
@@ -46,11 +46,11 @@ public:
 
 Vektor vektorkorutis(Vektor M, Vektor N){
     float x = M.vy * N.vz - N.vy * M.vz;
-    //x = ym * zn - yn * zm
+
     float y = -(M.vx * N.vz - N.vx * M.vz);
-    //y = -(xm * zn - xn * zm)
+
     float z = M.vx * N.vy - M.vy * N.vx;
-    //z = xm * yn - ym * xn
+
     float kordaja = std::sqrt(x*x + y*y + z*z);
 
     x = x/kordaja;
@@ -65,21 +65,22 @@ Vektor vektorkorutis(Vektor M, Vektor N){
 }
 
 class Stltriangle {
-    // plaan oleks constructoriga otse genereerida ja vb ka kirjutada kohe 50byte pack faili
-    //buffer tuleb teha meetodiks mis selle valjastab
-private:
-    Vektor normaal;
-    Point a, b, c;
-public:
-    //kordinaadid sisestatakse XYZ (paris kordinaadid mitte index) jarjekorras tuple'is ning nendega arvutatakse kolmnurga normaal
-    Stltriangle(Point sa, Point sb, Point sc) : a(sa), b(sb), c(sc), normaal(vektorkorutis(Vektor(sa, sb), Vektor(sa, sc))) {};
-    std::vector<uint8_t> bindataout() {
-        std::vector<uint8_t> buffer(50);
-        std::vector<float> data = {normaal.vx, normaal.vy, normaal.vz, a.x, a.y, a.z, b.x, b.y, b.z, c.x, c.y, c.z};
-        std::memcpy(buffer.data(), data.data(), sizeof(float) * data.size());
-        buffer[48] = 0;
-        buffer[49] = 0;
-        return buffer;
+        // plaan oleks constructoriga otse genereerida ja vb ka kirjutada kohe 50byte pack faili
+        //buffer tuleb teha meetodiks mis selle valjastab
+    private:
+        Vektor normaal;
+        Point a, b, c;
+    public:
+        //kordinaadid sisestatakse XYZ (paris kordinaadid mitte index) jarjekorras tuple'is ning nendega arvutatakse kolmnurga normaal
+        Stltriangle(Point sa, Point sb, Point sc) : a(sa), b(sb), c(sc), normaal(vektorkorutis(Vektor(sa, sb), Vektor(sa, sc))) {};
+
+        std::vector<uint8_t> bindataout() {
+            std::vector<uint8_t> buffer(50);
+            std::vector<float> data = {normaal.vx, normaal.vy, normaal.vz, a.x, a.y, a.z, b.x, b.y, b.z, c.x, c.y, c.z};
+            std::memcpy(buffer.data(), data.data(), sizeof(float) * data.size());
+            buffer[48] = 0;
+            buffer[49] = 0;
+            return buffer;
     }
 };
 
@@ -107,7 +108,7 @@ public:
         outFile.write(reinterpret_cast<char*>(headerbuff.data()), 80);
 
         //kolmnurkade arv
-        int number = kolmnurgad.size();
+        unsigned long int number = kolmnurgad.size();
         outFile.write(reinterpret_cast<char*>(&number), sizeof number);
 
 
@@ -139,85 +140,28 @@ class Syndot {
 class Mesh {
     private:
     float sqsize;
-    double lenx;
-    double leny;
+    long int lenx;
+    long int leny;
+    double zup;
+    double zdown;
     std::string nimi;
+    FileSTLbin stldat;
     /*create syndotsTihe jaetakse ara sest selle asemel saab genereerida syndotsid jooksvalt mapile
      * selleks et syndotilt saad kate andemd kasutatakse arvutaZ meetodit nins siis kustutatakse syndot mapilt koos keyga et saasta malu
      *
      */
+
     public:
     std::map<std::tuple<long int, long int>, Syndot> syndotsTihe; // tuple on kordinaatiderga (x, y) key et saada vastavad syndotinin
+
     std::vector<std::tuple<long int, long int>> XYvotmedTihe;
+
     std::map<std::tuple<long int, long int>, Point> PunktidXYZ; // tuple on kordinaatiderga (x, y) key et saada vastavad punktini
 
-    int genmesh(std::string const path = "C:\\Users\\Jan Markus\\Documents\\GitHub\\las2csv2stl\\data\\passa.csv") {
-        std::ifstream file(path);
-        if (!file.is_open()) {
-            std::cerr << "Error: Unable to open file!" << std::endl;
-            return 1;
-        }
+    std::vector<std::tuple<long int, long int>> baddots;
 
-        std::vector<std::vector<float>> data;
-        float minx = 0.0f, maxx = 0.0f, miny = 0.0f, maxy = 0.0f;
 
-        //Ricki mul on sinust vaga kahju aga me teeme erfiga normaliseeriva lahenudse et eemaldada data freakoutid
-        float const zalfa95 = 1.96;
-        double sumZ2 = 0.0;
-        double sumZ = 0.0;
-        double znum = 0.0;
 
-        std::string line;
-        std::getline(file, line); // Read and ignore header
-
-        while (std::getline(file, line)) {
-            if (line.empty() || line == "X,Y,Z\n")
-                continue;
-
-            std::istringstream iss(line);
-            std::string token;
-            std::vector<float> coordinates;
-
-            while (std::getline(iss, token, ',')) {
-                coordinates.push_back(std::stof(token));
-            }
-
-            if (minx == 0 || minx >= coordinates[0])
-                minx = coordinates[0];
-            if (maxx == 0 || maxx <= coordinates[0])
-                maxx = coordinates[0];
-            if (miny == 0 || miny >= coordinates[1])
-                miny = coordinates[1];
-            if (maxy == 0 || maxy <= coordinates[1])
-                maxy = coordinates[1];
-
-            sumZ += coordinates[2];
-            sumZ2 += coordinates[2]*coordinates[2];
-            znum += 1;
-
-            data.push_back(coordinates);
-        }
-        file.close();
-
-        lenx = maxx - minx;
-        leny = maxy - miny;
-
-        double ex = sumZ/znum;
-        double ex2 = sumZ2/znum;
-        double dx = ex2 - (ex*ex);
-        //arvutame usaldusintervallid
-
-        double usaldusZmin = ex - (zalfa95*(dx/ sqrt(znum)));
-        double usaldusZmax = ex + (zalfa95*(dx/ sqrt(znum)));
-
-        // kontrollime kas punkti vaartus on usutav ja kui ei ole siis eemdaldame andmestikust zalfa vaartust voib muuta vajadusel
-        for (const auto& point : data) {
-            if (point[2] <= usaldusZmin && point[2] >= usaldusZmax) {sqrmeshadd(point[0]-minx, point[1]-miny, point[2]);}
-        }
-
-        data.clear();
-        return 0;
-    }
     void sqrmeshadd(float x, float y, float z){
         /* PYTHON code:
              * xkord = int(self.x//self.gridsize)
@@ -270,6 +214,7 @@ class Mesh {
         syndotsTihe[{xsec + 1, ysec + 1}].zval += arvutakaal(xup, yup) * z;
         //selle lahendusega on voimalik et koik syndotid ei genereerita. Selle jaoks peab kolmnurkade arvutamisel sellega arvestama
     }
+
     void syndata(long int start , unsigned long int end){
         // arvutame koigi syndotide vaartused
         for (int i = start; i <= end; i += 1){
@@ -278,15 +223,204 @@ class Mesh {
             punktRN.x = static_cast<float>(std::get<0>(voti)) * sqsize;
             punktRN.y = static_cast<float>(std::get<1>(voti)) * sqsize;
             double z_double = syndotsTihe[voti].arvutaz(); // assuming arvutaz() returns double
+            if (z_double > zup){
+                std::cout << "Z liiga korge: " << punktRN.x << ", " << punktRN.y << ", " << z_double << "\n";}
             punktRN.z = static_cast<float>(z_double); // cast double to float
             PunktidXYZ[voti] = punktRN;
         }
     }
-    Mesh(std::string const pathnimi, std::string const meshnimi, float ruudusuurus) {
+
+    void bruteforcedot(long int xcor, long int ycor){
+        //see funktisoon saab argumendiks puudu oleva kordinaadi ning genereerib selle kordinaadid. kui ta ei leia kordinaaile rohkem kui 5 naabrit siis defineeritakse punkt 0 tasanile
+        float parisnaabritearv = 0.0;
+        float naabritesum = 0.0;
+        int kaugusotsitav = 1;
+        int x_1;
+        int x_2;
+        int y_1;
+        int y_2;
+        if (xcor - kaugusotsitav < 0) {
+            x_1 = 0;
+        } else {x_1 = xcor - kaugusotsitav;}
+
+        if (xcor + kaugusotsitav >= lenx) {
+            x_2 = lenx;
+        } else {x_2 = xcor + kaugusotsitav;}
+
+        if (ycor - kaugusotsitav < 0) {
+            y_1 = 0;
+        } else {y_1 = ycor - kaugusotsitav;}
+
+        if (ycor + kaugusotsitav >= leny) {
+            y_2 = leny;
+        } else {y_2 = ycor + kaugusotsitav;}
+
+        for (long int k = x_1; k <= x_2; k +=1){
+            for (long int l = y_1; l <= y_2; l+=1) {
+                if (PunktidXYZ.find({k, l}) != PunktidXYZ.end()) {
+                    parisnaabritearv += 1;
+                    naabritesum += PunktidXYZ[{k, l}].z;
+                }
+            }
+        }
+
+        float zRN = naabritesum/parisnaabritearv;
+        Point punktRN{};
+        punktRN.x = static_cast<float>(xcor) * sqsize;
+        punktRN.y = static_cast<float>(ycor) * sqsize;
+        if (parisnaabritearv >= 4){
+        punktRN.z = zRN;
+        if (punktRN.z > zup){
+            std::cout << "Z liiga korge bruteforce error: " << punktRN.x << ", " << punktRN.y << ", " << zRN << "\n";}
+
+        PunktidXYZ[{xcor, ycor}] = punktRN;} else {
+            punktRN.z = 0.0;
+            PunktidXYZ[{xcor, ycor}] = punktRN;
+        }
+        XYvotmedTihe.emplace_back(xcor, ycor);
+    };
+
+    void findbadDTS(){
+        //otsime punkte mida mapis pole selleks et tegeleda nendega ning lahendada neile vaartused
+        for (long int i = 0; i <= lenx; i += 1){
+            for (long int j = 0; j <= leny; j += 1){
+                if (syndotsTihe.find({i, j}) == syndotsTihe.end()) {
+                    baddots.emplace_back(i, j);}
+            }
+        }
+    };
+
+    void forcedotseq(unsigned long int start, unsigned long int end){
+        for (unsigned long int i = start; i < end; i += 1){
+            long int RNx = std::get<0>(baddots[i]);
+            long int RNy = std::get<1>(baddots[i]);
+            bruteforcedot(RNx, RNy);
+        }
+    }
+
+    void genereeriTRI(unsigned long int start, unsigned long int end){
+        /*
+         * i = 0 #x
+        while i < self.sizex:
+            j = 0  #y
+            while j < self.sizey:
+                a = self.syndots[i][j]
+                b = self.syndots[i + 1][j]
+                c = self.syndots[i + 1][j + 1]
+                d = self.syndots[i][j + 1]
+                tri1 = Triangle(a, b, c)
+                tri2 = Triangle(a, c, d)
+                self.kolmnurgad.append(tri1)
+                self.kolmnurgad.append(tri2)
+                j += 1
+            i += 1
+         */
+        for (auto i = start; i <= end; i += 1) {
+            long int RNx = std::get<0>(XYvotmedTihe[i]);
+            long int RNy = std::get<1>(XYvotmedTihe[i]);
+            if (RNx == lenx || RNy == leny) {
+                continue;
+            }
+            Point a = PunktidXYZ[{RNx, RNy}];
+            Point b = PunktidXYZ[{RNx + 1, RNy}];
+            Point c = PunktidXYZ[{RNx, RNy + 1}];
+            Point d = PunktidXYZ[{RNx + 1, RNy + 1}];
+            stldat.kolmnurgad.emplace_back(a, b, c);
+            stldat.kolmnurgad.emplace_back(a, c, d);
+        } 
+    };
+    
+    Mesh(std::string const& path, std::string const& meshnimi, float ruudusuurus) {
+        std::ifstream file(path);
         sqsize = ruudusuurus;
+        if (!file.is_open()) {
+            throw std::invalid_argument("Error: Unable to open file!");
+
+        }
+
+        std::vector<std::vector<float>> data;
+        float minx = 0.0, maxx = 0.0, miny = 0.0, maxy = 0.0;
+
+        //Ricki mul on sinust vaga kahju aga me teeme erfiga normaliseeriva lahenudse et eemaldada data freakoutid
+        float const zalfa = 2600.0; //zalfa2 95le = 1.96
+        double sumZ2 = 0.0;
+        double sumZ = 0.0;
+        double znum = 0.0;
+
+        std::string line;
+        std::getline(file, line); // Read and ignore header
+
+        while (std::getline(file, line)) {
+            if (line.empty() || line == "X,Y,Z\n")
+                continue;
+
+            std::istringstream iss(line);
+            std::string token;
+            std::vector<float> coordinates;
+
+            while (std::getline(iss, token, ',')) {
+                coordinates.push_back(std::stof(token));
+            }
+
+            if (minx == 0 || minx >= coordinates[0])
+                minx = coordinates[0];
+            if (maxx == 0 || maxx <= coordinates[0])
+                maxx = coordinates[0];
+            if (miny == 0 || miny >= coordinates[1])
+                miny = coordinates[1];
+            if (maxy == 0 || maxy <= coordinates[1])
+                maxy = coordinates[1];
+
+            sumZ += coordinates[2];
+            sumZ2 += coordinates[2]*coordinates[2];
+            znum += 1;
+
+            data.push_back(coordinates);
+        }
+        file.close();
+
+        lenx = static_cast<long int>(std::floor(maxx - minx));
+        leny = static_cast<long int>(std::floor(maxy - miny));
+
+        double ex = sumZ/znum;
+        double ex2 = sumZ2/znum;
+        double dx = ex2 - (ex*ex);
+        //arvutame usaldusintervallid
+
+        zdown = ex - (zalfa * (dx / sqrt(znum)));
+        zup = ex + (zalfa * (dx / sqrt(znum)));
+
+        // kontrollime kas punkti vaartus on usutav ja kui ei ole siis eemdaldame andmestikust. zalfa vaartust voib muuta vajadusel
+        for (const auto& point : data) {
+            if (point[2] <= zdown && point[2] >= zup) {sqrmeshadd(point[0] - minx, point[1] - miny, point[2]);}
+        }
+
+        data.clear();
+        std::cout << "andmed normaliseeritud ja sorteeritud";
+
         // valmistame kolmnurgad saadud dataga
-        genmesh(pathnimi);
         syndata(0, XYvotmedTihe.size());
 
+        //leiame koik syndotid mis jaid genereerimata sest datat pole voi on muu viga arvutustega
+        findbadDTS();
+
+        //for loop mida saaab paraleliseerida kus bruteforcitakse koik punktid
+        forcedotseq(0, baddots.size());
+        baddots.clear();
+        syndotsTihe.clear();
+        genereeriTRI(0, XYvotmedTihe.size());
+        stldat.binwriteout(meshnimi);
     }
 };
+
+int main(){
+
+    try {
+        Mesh m1(R"(C:\Users\Jan Markus\Documents\GitHub\las2csv2stl\data\passa.csv)", "testSTlfile", 1.0);
+    } catch (const std::invalid_argument& e) {
+        std::cerr << "Error: " << e.what() << std::endl;
+        return 1;
+    }
+
+    return 0;
+}
