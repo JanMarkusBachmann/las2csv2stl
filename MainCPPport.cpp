@@ -282,8 +282,8 @@ class Mesh {
 
     void findbadDTS(){
         //otsime punkte mida mapis pole selleks et tegeleda nendega ning lahendada neile vaartused
-        for (long int i = 0; i <= lenx; i += 1){
-            for (long int j = 0; j <= leny; j += 1){
+        for (long int i = 0; i < lenx; i += 1){
+            for (long int j = 0; j < leny; j += 1){
                 if (syndotsTihe.find({i, j}) == syndotsTihe.end()) {
                     baddots.emplace_back(i, j);}
             }
@@ -315,18 +315,18 @@ class Mesh {
                 j += 1
             i += 1
          */
-        for (auto i = start; i <= end; i += 1) {
+        for (auto i = start; i < end; i += 1) {
             long int RNx = std::get<0>(XYvotmedTihe[i]);
             long int RNy = std::get<1>(XYvotmedTihe[i]);
-            if (RNx == lenx || RNy == leny) {
+            if (RNx +1 >= lenx || RNy+1 >= leny) {
                 continue;
             }
             Point a = PunktidXYZ[{RNx, RNy}];
             Point b = PunktidXYZ[{RNx + 1, RNy}];
             Point c = PunktidXYZ[{RNx, RNy + 1}];
             Point d = PunktidXYZ[{RNx + 1, RNy + 1}];
-            stldat.kolmnurgad.emplace_back(a, b, c);
-            stldat.kolmnurgad.emplace_back(a, c, d);
+            stldat.kolmnurgad.emplace_back(a, b, d);
+            stldat.kolmnurgad.emplace_back(a, d, c);
         } 
     };
     
@@ -392,14 +392,14 @@ class Mesh {
 
         // kontrollime kas punkti vaartus on usutav ja kui ei ole siis eemdaldame andmestikust. zalfa vaartust voib muuta vajadusel
         for (const auto& point : data) {
-            if (point[2] <= zdown && point[2] >= zup) {sqrmeshadd(point[0] - minx, point[1] - miny, point[2]);}
+            if (point[2] >= zdown && point[2] <= zup) {sqrmeshadd(point[0] - minx, point[1] - miny, point[2]);}
         }
 
         data.clear();
         std::cout << "andmed normaliseeritud ja sorteeritud";
 
         // valmistame kolmnurgad saadud dataga
-        syndata(0, XYvotmedTihe.size());
+        syndata(0, XYvotmedTihe.size()-1);
 
         //leiame koik syndotid mis jaid genereerimata sest datat pole voi on muu viga arvutustega
         findbadDTS();
@@ -408,7 +408,7 @@ class Mesh {
         forcedotseq(0, baddots.size());
         baddots.clear();
         syndotsTihe.clear();
-        genereeriTRI(0, XYvotmedTihe.size());
+        genereeriTRI(0, XYvotmedTihe.size()-1);
         stldat.binwriteout(meshnimi);
     }
 };
@@ -416,6 +416,7 @@ class Mesh {
 int main(){
 
     try {
+        //Mesh m1(R"(C:\Users\Jan Markus\Documents\GitHub\las2csv2stl\data\testdata.csv)", "testSTlfile", 1.0);
         Mesh m1(R"(C:\Users\Jan Markus\Documents\GitHub\las2csv2stl\data\passa.csv)", "testSTlfile", 1.0);
     } catch (const std::invalid_argument& e) {
         std::cerr << "Error: " << e.what() << std::endl;
