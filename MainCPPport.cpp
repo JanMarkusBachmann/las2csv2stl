@@ -74,7 +74,7 @@ class Stltriangle {
     public:
         //kordinaadid sisestatakse XYZ (paris kordinaadid mitte index) jarjekorras tuple'is ning nendega arvutatakse kolmnurga normaal
         Stltriangle(Point sa, Point sb, Point sc) : a(sa), b(sb), c(sc), normaal(vektorkorutis(Vektor(sa, sb), Vektor(sa, sc))) {};
-
+        Stltriangle(Point sa, Point sb, Point sc, Vektor n) : a(sa), b(sb), c(sc), normaal(n) {}; //servade jaoks
         std::vector<uint8_t> bindataout() {
             std::vector<uint8_t> buffer(50);
             std::vector<float> data = {normaal.vx, normaal.vy, normaal.vz, a.x, a.y, a.z, b.x, b.y, b.z, c.x, c.y, c.z};
@@ -330,7 +330,66 @@ class Mesh {
             stldat.kolmnurgad.emplace_back(a, d, c);
         } 
     };
-    
+
+    void genereeriservad(){
+
+        Point pohicentr{1.0, 1.0, -10.0};
+
+        //valmistame horisontaalse serva koos pohjaga
+        for (long int x = 0; x + 1 < lenx; x+=1){
+            //kyle normaal peab olema y- suunas
+            Point a = PunktidXYZ[{x, 0}];
+            Point b = PunktidXYZ[{x + 1, 0}];
+            Point c = PunktidXYZ[{x, 0}];
+            c.z = -10.0;
+            Point d = PunktidXYZ[{x + 1, 0}];
+            d.z = -10.0;
+            stldat.kolmnurgad.emplace_back(a, b, d, Vektor(0.0, -1.0, 0.0));
+            stldat.kolmnurgad.emplace_back(a, d, c, Vektor(0.0, -1.0, 0.0));
+            stldat.kolmnurgad.emplace_back(c, d, pohicentr, Vektor(0.0, 0.0, -1.0));
+        }
+
+        for (long int x = 0; x + 1 < lenx; x+=1){
+            //kyle normaal peab olema y+ suunas
+            Point a = PunktidXYZ[{x, leny - 1}];
+            Point b = PunktidXYZ[{x + 1, leny - 1}];
+            Point c = PunktidXYZ[{x, leny - 1}];
+            c.z = -10.0;
+            Point d = PunktidXYZ[{x + 1, leny - 1}];
+            d.z = -10.0;
+            stldat.kolmnurgad.emplace_back(a, b, d, Vektor(0.0, 1.0, 0.0));
+            stldat.kolmnurgad.emplace_back(a, d, c, Vektor(0.0, 1.0, 0.0));
+            stldat.kolmnurgad.emplace_back(c, d, pohicentr, Vektor(0.0, 0.0, -1.0));
+        }
+
+        //vertikaalsed kyljed ja pohi
+        for (long int y = 0; y + 1 < leny; y+=1){
+            //kyle normaal peab olema x- suunas
+            Point a = PunktidXYZ[{0, y}];
+            Point b = PunktidXYZ[{0, y + 1}];
+            Point c = PunktidXYZ[{0, y}];
+            c.z = -10.0;
+            Point d = PunktidXYZ[{0, y + 1}];
+            d.z = -10.0;
+            stldat.kolmnurgad.emplace_back(a, b, d, Vektor(-1.0, 0.0, 0.0));
+            stldat.kolmnurgad.emplace_back(a, d, c, Vektor(-1.0, 0.0, 0.0));
+            stldat.kolmnurgad.emplace_back(c, d, pohicentr, Vektor(0.0, 0.0, -1.0));
+            }
+
+        for (long int y = 0; y + 1 < leny; y+=1){
+            //kyle normaal peab olema x+ suunas
+            Point a = PunktidXYZ[{lenx - 1, y}];
+            Point b = PunktidXYZ[{lenx - 1, y + 1}];
+            Point c = PunktidXYZ[{lenx - 1, y}];
+            c.z = -10.0;
+            Point d = PunktidXYZ[{lenx - 1, y + 1}];
+            d.z = -10.0;
+            stldat.kolmnurgad.emplace_back(a, b, d, Vektor(1.0, 0.0, 0.0));
+            stldat.kolmnurgad.emplace_back(a, d, c, Vektor(1.0, 0.0, 0.0));
+            stldat.kolmnurgad.emplace_back(c, d, pohicentr, Vektor(0.0, 0.0, -1.0));
+        }
+    }
+
     Mesh(std::string const& path, std::string const& meshnimi, float ruudusuurus) {
         std::ifstream file(path);
         sqsize = ruudusuurus;
@@ -352,7 +411,7 @@ class Mesh {
         std::getline(file, line); // Read and ignore header
 
         while (std::getline(file, line)) {
-            if (line.empty() || line == "X,Y,Z\n")
+            if (line.empty() || line == "X,Y,Z")
                 continue;
 
             std::istringstream iss(line);
@@ -410,6 +469,7 @@ class Mesh {
         baddots.clear();
         syndotsTihe.clear();
         genereeriTRI(0, XYvotmedTihe.size()-1);
+        genereeriservad();
         stldat.binwriteout(meshnimi);
     }
 };
@@ -425,8 +485,8 @@ int main(){
 
     std::cout << gettime() << "\n";
     try {
-        //Mesh m1(R"(C:\Users\Jan Markus\Documents\GitHub\las2csv2stl\data\testdata.csv)", "testSTlfile", 1.0);
-        Mesh m1(R"(C:\Users\Jan Markus\Documents\GitHub\las2csv2stl\data\mastervana.csv)", "vanalinnsuurcpp", 0.5);
+        Mesh m1(R"(C:\Users\Jan Markus\Documents\GitHub\las2csv2stl\data\muuhuF.csv)", "muhutestSTlfile", 1.0);
+        //Mesh m1(R"(C:\Users\Jan Markus\Documents\lidarmeshdata\New folder\muhukoost.csv)", "muhusuur", 1);
     } catch (const std::invalid_argument& e) {
         std::cerr << "Error: " << e.what() << std::endl;
         return 1;
