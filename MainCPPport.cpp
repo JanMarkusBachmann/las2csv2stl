@@ -14,6 +14,7 @@
 #include <tuple>
 #include <cstdint>
 #include <cstring>
+#include <ctime>
 
 double arvutakaal(float x, float y){
     double kaugus = std::sqrt(x*x + y*y);
@@ -379,8 +380,8 @@ class Mesh {
         }
         file.close();
 
-        lenx = static_cast<long int>(std::floor(maxx - minx));
-        leny = static_cast<long int>(std::floor(maxy - miny));
+        lenx = static_cast<long int>(std::floor((maxx - minx)/sqsize));
+        leny = static_cast<long int>(std::floor((maxy - miny)/sqsize));
 
         double ex = sumZ/znum;
         double ex2 = sumZ2/znum;
@@ -413,15 +414,23 @@ class Mesh {
     }
 };
 
+std::string gettime(){
+    std::time_t currentTime = std::time(nullptr);
+
+    // Convert current time to string
+    return std::ctime(&currentTime);
+}
+
 int main(){
 
+    std::cout << gettime() << "\n";
     try {
         //Mesh m1(R"(C:\Users\Jan Markus\Documents\GitHub\las2csv2stl\data\testdata.csv)", "testSTlfile", 1.0);
-        Mesh m1(R"(C:\Users\Jan Markus\Documents\GitHub\las2csv2stl\data\passa.csv)", "testSTlfile", 1.0);
+        Mesh m1(R"(C:\Users\Jan Markus\Documents\GitHub\las2csv2stl\data\vanalinn.csv)", "vanalinncpp", 0.5);
     } catch (const std::invalid_argument& e) {
         std::cerr << "Error: " << e.what() << std::endl;
         return 1;
     }
-
+    std::cout << "\n" << gettime() << "\n";
     return 0;
 }
