@@ -485,7 +485,7 @@ int main(){
 
     std::cout << gettime() << "\n";
     try {
-        Mesh m1(R"(C:\Users\Jan Markus\Documents\GitHub\las2csv2stl\data\muuhuF.csv)", "muhutestSTlfile", 1.0);
+        Mesh m1(R"(C:\Users\Jan Markus\Documents\GitHub\las2csv2stl\data\vanalinn.csv)", "vanatihke", 0.5);
         //Mesh m1(R"(C:\Users\Jan Markus\Documents\lidarmeshdata\New folder\muhukoost.csv)", "muhusuur", 1);
     } catch (const std::invalid_argument& e) {
         std::cerr << "Error: " << e.what() << std::endl;
