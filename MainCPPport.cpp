@@ -426,7 +426,7 @@ int main(){
     std::cout << gettime() << "\n";
     try {
         //Mesh m1(R"(C:\Users\Jan Markus\Documents\GitHub\las2csv2stl\data\testdata.csv)", "testSTlfile", 1.0);
-        Mesh m1(R"(C:\Users\Jan Markus\Documents\GitHub\las2csv2stl\data\vanalinn.csv)", "vanalinncpp", 0.5);
+        Mesh m1(R"(C:\Users\Jan Markus\Documents\GitHub\las2csv2stl\data\mastervana.csv)", "vanalinnsuurcpp", 0.5);
     } catch (const std::invalid_argument& e) {
         std::cerr << "Error: " << e.what() << std::endl;
         return 1;
