@@ -15,6 +15,14 @@
 #include <cstdint>
 #include <cstring>
 #include <ctime>
+#include <queue>
+
+std::string gettime(){
+    std::time_t currentTime = std::time(nullptr);
+
+    // Convert current time to string
+    return std::ctime(&currentTime);
+};
 
 double arvutakaal(float x, float y){
     double kaugus = std::sqrt(x*x + y*y);
@@ -129,9 +137,11 @@ class Syndot {
         Lisaks ei pea syndot teadma oma enda kordinaate meshpinnal. Sellega on voimalik valtida malukulukat 4 doubel kordinaati */
         double zval = 0.0;
         double zsum = 0.0;
-        double arvutaz() const {
+        double z = 0.0;
+        double arvutaz(){
             if (zsum != 0.0) {
-                return zval/zsum;
+                z = zval/zsum;
+                return z;
             } else {std::cout << "syndot valmis aga datat pole \n";
             return 0.0;}
         };
@@ -160,8 +170,6 @@ class Mesh {
     std::map<std::tuple<long int, long int>, Point> PunktidXYZ; // tuple on kordinaatiderga (x, y) key et saada vastavad punktini
 
     std::vector<std::tuple<long int, long int>> baddots;
-
-
 
     void sqrmeshadd(float x, float y, float z){
         /* PYTHON code:
@@ -214,8 +222,7 @@ class Mesh {
         syndotsTihe[{xsec + 1, ysec + 1}].zsum += arvutakaal(xup, yup);
         syndotsTihe[{xsec + 1, ysec + 1}].zval += arvutakaal(xup, yup) * z;
         //selle lahendusega on voimalik et koik syndotid ei genereerita. Selle jaoks peab kolmnurkade arvutamisel sellega arvestama
-    }
-
+    };
     void syndata(long int start , unsigned long int end){
         // arvutame koigi syndotide vaartused
         for (int i = start; i <= end; i += 1){
@@ -229,8 +236,7 @@ class Mesh {
             punktRN.z = static_cast<float>(z_double); // cast double to float
             PunktidXYZ[voti] = punktRN;
         }
-    }
-
+    };
     void bruteforcedot(long int xcor, long int ycor){
         //see funktisoon saab argumendiks puudu oleva kordinaadi ning genereerib selle kordinaadid. kui ta ei leia kordinaaile rohkem kui 5 naabrit siis defineeritakse punkt 0 tasanile
         float parisnaabritearv = 0.0;
@@ -280,25 +286,26 @@ class Mesh {
         }
         XYvotmedTihe.emplace_back(xcor, ycor);
     };
-
     void findbadDTS(){
         //otsime punkte mida mapis pole selleks et tegeleda nendega ning lahendada neile vaartused
         for (long int i = 0; i < lenx; i += 1){
             for (long int j = 0; j < leny; j += 1){
                 if (syndotsTihe.find({i, j}) == syndotsTihe.end()) {
                     baddots.emplace_back(i, j);}
+                if (syndotsTihe[{i, j}].z <= -5.0){
+                    baddots.emplace_back(i, j);
+                    syndotsTihe.erase({i, j});
+                }
             }
         }
     };
-
     void forcedotseq(unsigned long int start, unsigned long int end){
         for (unsigned long int i = start; i < end; i += 1){
             long int RNx = std::get<0>(baddots[i]);
             long int RNy = std::get<1>(baddots[i]);
             bruteforcedot(RNx, RNy);
         }
-    }
-
+    };
     void genereeriTRI(unsigned long int start, unsigned long int end){
         /*
          * i = 0 #x
@@ -330,7 +337,6 @@ class Mesh {
             stldat.kolmnurgad.emplace_back(a, d, c);
         } 
     };
-
     void genereeriservad(){
 
         Point pohicentr{1.0, 1.0, -10.0};
@@ -388,8 +394,7 @@ class Mesh {
             stldat.kolmnurgad.emplace_back(a, d, c, Vektor(1.0, 0.0, 0.0));
             stldat.kolmnurgad.emplace_back(c, d, pohicentr, Vektor(0.0, 0.0, -1.0));
         }
-    }
-
+    };
     Mesh(std::string const& path, std::string const& meshnimi, float ruudusuurus) {
         std::ifstream file(path);
         sqsize = ruudusuurus;
@@ -398,7 +403,7 @@ class Mesh {
 
         }
 
-        std::vector<std::vector<float>> data;
+        std::deque<std::vector<float>> data;
         float minx = 0.0, maxx = 0.0, miny = 0.0, maxy = 0.0;
 
         //Ricki mul on sinust vaga kahju aga me teeme erfiga normaliseeriva lahenudse et eemaldada data freakoutid
@@ -430,6 +435,10 @@ class Mesh {
                 miny = coordinates[1];
             if (maxy == 0 || maxy <= coordinates[1])
                 maxy = coordinates[1];
+            if (coordinates[2] < -5){
+                //std::cout << "kordinaat " << coordinates[2] << "\n";
+                coordinates[2] = 0.0;
+            }
 
             sumZ += coordinates[2];
             sumZ2 += coordinates[2]*coordinates[2];
@@ -450,47 +459,51 @@ class Mesh {
         zdown = ex - (zalfa * (dx / sqrt(znum)));
         zup = ex + (zalfa * (dx / sqrt(znum)));
 
+        std::cout << "andmed loetud failist " << gettime();
+
         // kontrollime kas punkti vaartus on usutav ja kui ei ole siis eemdaldame andmestikust. zalfa vaartust voib muuta vajadusel
         for (const auto& point : data) {
             if (point[2] >= zdown && point[2] <= zup) {sqrmeshadd(point[0] - minx, point[1] - miny, point[2]);}
         }
 
         data.clear();
-        std::cout << "andmed normaliseeritud ja sorteeritud";
+        std::cout << "andmed normaliseeritud ja sorteeritud " << gettime();
 
         // valmistame kolmnurgad saadud dataga
         syndata(0, XYvotmedTihe.size()-1);
 
+        std::cout << "andmed synteesitud " << gettime();
+
         //leiame koik syndotid mis jaid genereerimata sest datat pole voi on muu viga arvutustega
         findbadDTS();
-
+        std::cout << "baddots leitud " << gettime();
         //for loop mida saaab paraleliseerida kus bruteforcitakse koik punktid
         forcedotseq(0, baddots.size());
+        std::cout << "baddots parandatud " << gettime();
         baddots.clear();
         syndotsTihe.clear();
+        std::cout << "cleanup tehtud " << gettime();
         genereeriTRI(0, XYvotmedTihe.size()-1);
+        std::cout << "genereeriti mesh " << gettime();
         genereeriservad();
+        std::cout << "genereriti pohi " << gettime();
         stldat.binwriteout(meshnimi);
     }
 };
 
-std::string gettime(){
-    std::time_t currentTime = std::time(nullptr);
 
-    // Convert current time to string
-    return std::ctime(&currentTime);
-}
 
 int main(){
 
-    std::cout << gettime() << "\n";
+    std::cout << "Alustame tood " << gettime();
     try {
-        Mesh m1(R"(C:\Users\Jan Markus\Documents\GitHub\las2csv2stl\data\vanalinn.csv)", "vanatihke", 0.5);
-        //Mesh m1(R"(C:\Users\Jan Markus\Documents\lidarmeshdata\New folder\muhukoost.csv)", "muhusuur", 1);
+        //Mesh m1(R"(C:\Users\Jan Markus\Documents\GitHub\las2csv2stl\data\vanalinn.csv)", "vanatihke", 0.5);
+        //Mesh m1(R"(C:\Users\Jan Markus\Documents\GitHub\las2csv2stl\data\muuhuF.csv)", "muhuf", 0.5);
+        Mesh m1(R"(C:\Users\Jan Markus\Documents\lidardata\vanalinn\csv\mastervana.csv)", "Vanalinn6", 0.5);
     } catch (const std::invalid_argument& e) {
         std::cerr << "Error: " << e.what() << std::endl;
         return 1;
     }
-    std::cout << "\n" << gettime() << "\n";
+    std::cout << "lopetas too " << gettime() << "\n";
     return 0;
 }
