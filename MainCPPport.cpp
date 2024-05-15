@@ -435,7 +435,7 @@ class Mesh {
             if (maxy == 0 || maxy <= coordinates[1])
                 maxy = coordinates[1];
             if (coordinates[2] < -5){
-                //std::cout << "kordinaat " << coordinates[2] << "\n"2;
+                //std::cout << "kordinaat " << coordinates[2] << "\n"2\;
                 coordinates[2] = 0.0;
             }
 
