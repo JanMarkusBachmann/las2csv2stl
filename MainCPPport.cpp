@@ -406,7 +406,6 @@ class Mesh {
         std::deque<std::vector<float>> data;
         float minx = 0.0, maxx = 0.0, miny = 0.0, maxy = 0.0;
 
-        //Ricki mul on sinust vaga kahju aga me teeme erfiga normaliseeriva lahenudse et eemaldada data freakoutid
         float const zalfa = 2600.0; //zalfa2 95le = 1.96
         double sumZ2 = 0.0;
         double sumZ = 0.0;
@@ -499,7 +498,7 @@ int main(){
     try {
         //Mesh m1(R"(C:\Users\Jan Markus\Documents\GitHub\las2csv2stl\data\vanalinn.csv)", "vanatihke", 0.5);
         //Mesh m1(R"(C:\Users\Jan Markus\Documents\GitHub\las2csv2stl\data\muuhuF.csv)", "muhuf", 0.5);
-        Mesh m1(R"(C:\Users\Jan Markus\Documents\lidardata\vanalinn\csv\mastervana.csv)", "Vanalinn6", 0.5);
+        Mesh m1(R"(C:\Users\JanMarkus\Documents\GitHub\las2csv2stl\data\vanalinn.csv)", "Vanalinn6", 0.5);
     } catch (const std::invalid_argument& e) {
         std::cerr << "Error: " << e.what() << std::endl;
         return 1;
